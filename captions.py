@@ -1,9 +1,11 @@
 import os
 import re
 import sys
+import json
 import argparse
 import pandas as pd
 from functools import partial
+from collections import OrderedDict
 from youtube_transcript_api import YouTubeTranscriptApi
 
 def download_captions():
@@ -28,9 +30,13 @@ def download_captions():
                     duration.append(subtitle[s+1]['start']-subtitle[s]['start'])
             except:
                 pass
-        subtitle_list =  list(zip(video_id, text, start, duration))
-        dfObj = pd.DataFrame(subtitle_list)
-        dfObj.to_csv(base_dir+i+'/text/subtitle.csv', index=False, header =False)
+        df = pd.DataFrame({"id":id, "text":text, "start":start, "duration":duration, "name":names})
+        df.to_csv(base_dir+i+'/text/subtitle.csv', encoding='utf-8')
+        file_data=OrderedDict()
+        for i in range(df.shape[0]):
+            file_data[df['name'][i]]=df['text'][i]
+        with open (base_dir+i+'/alignment.json', 'w', encoding="utf-8") as make_file:
+            json.dump(file_data, make_file, ensure_ascii=False, indent="\n")
         print(i+' channel was finished')
         
 def download_caption_batch(base_dirs, channels):
