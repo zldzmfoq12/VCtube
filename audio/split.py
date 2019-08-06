@@ -31,52 +31,6 @@ def remove_breath(audio):
 
     return audio
 
-def split_on_silence_with_librosa(
-        audio_path, top_db=40, frame_length=1024, hop_length=256,
-        skip_idx=0, out_ext="wav",
-        min_segment_length=3, max_segment_length=8,
-        pre_silence_length=0, post_silence_length=0):
-
-    filename = os.path.basename(audio_path).split('.', 1)[0]
-    in_ext = audio_path.rsplit(".")[1]
-
-    audio = load_audio(audio_path)
-
-    edges = librosa.effects.split(audio,
-            top_db=top_db, frame_length=frame_length, hop_length=hop_length)
-
-    new_audio = np.zeros_like(audio)
-    for idx, (start, end) in enumerate(edges[skip_idx:]):
-        new_audio[start:end] = remove_breath(audio[start:end])
-        
-    save_audio(new_audio, add_postfix(audio_path, "no_breath"))
-    audio = new_audio
-    edges = librosa.effects.split(audio,
-            top_db=top_db, frame_length=frame_length, hop_length=hop_length)
-
-    audio_paths = []
-    for idx, (start, end) in enumerate(edges[skip_idx:]):
-        segment = audio[start:end]
-        duration = get_duration(segment)
-
-        if duration <= min_segment_length or duration >= max_segment_length:
-            continue
-
-        output_path = "{}/{}.{:04d}.{}".format(
-                os.path.dirname(audio_path), filename, idx, out_ext)
-
-        padded_segment = np.concatenate([
-                get_silence(pre_silence_length),
-                segment,
-                get_silence(post_silence_length),
-        ])
-
-
-        
-        save_audio(padded_segment, output_path)
-        audio_paths.append(output_path)
-
-    return audio_paths
 
 def read_audio(audio_path):
     return AudioSegment.from_file(audio_path)
@@ -114,10 +68,8 @@ def split_on_silence_with_pydub(
 def split_on_silence_batch(audio_paths, method, **kargv):
     audio_paths.sort()
     method = method.lower()
-
-    if method == "librosa":
-        fn = partial(split_on_silence_with_librosa, **kargv)
-    elif method == "pydub":
+    
+    if method == "pydub":
         fn = partial(split_on_silence_with_pydub, **kargv)
 
     parallel_run(fn, audio_paths,
@@ -127,7 +79,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--audio_pattern', required=True)
     parser.add_argument('--out_ext', default='wav')
-    parser.add_argument('--method', choices=['librosa', 'pydub'], required=True)
+    parser.add_argument('--method', default='pydub')
     config = parser.parse_args()
 
     audio_paths = glob(config.audio_pattern)
