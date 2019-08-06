@@ -20,11 +20,11 @@ After preparing prerequisites, install tensorflow(or tensorflow-gpu)
 
 ### 2-2. Generate Korean datasets
 
-Follow below commands. (explain with `son` dataset)
+Follow below commands. (explain with `channel1` dataset)
 
 1. Download speech(or video) and text.
 
-       youtube-dl --download-archive downloaded.txt --no-overwrites -ic -o "D:/deepvoice/datasets/lee/audio/%(id)s.%(ext)s" --yes-playlist --extract-audio --audio-format wav --audio-quality 0 --socket-timeout 5 "youtube channel url"
+       youtube-dl --download-archive downloaded.txt --no-overwrites -ic -o "./datasets/channel1/audio/%(id)s.%(ext)s" --yes-playlist --extract-audio --audio-format wav --audio-quality 0 --socket-timeout 5 "youtube channel url"
        
        python3 -m caption --base_dir "./datasets/" --channels=channel1,channel2,channel3
 
@@ -34,7 +34,7 @@ Follow below commands. (explain with `son` dataset)
 
 3. Finally, generated numpy files which will be used in training.
 
-       python3 -m datasets.generate_data ./datasets/son/alignment.json
+       python3 -m datasets.generate_data ./datasets/channel1/alignment.json
 
 Because the automatic generation is extremely naive, the dataset is noisy. However, if you have enough datasets (20+ hours with random initialization or 5+ hours with pretrained model initialization), you can expect an acceptable quality of audio synthesis.
 
@@ -43,7 +43,7 @@ Because the automatic generation is extremely naive, the dataset is noisy. Howev
 The `datasets` directory should look like:
 
     datasets
-    ├── kss
+    ├── channel1
     │   ├── alignment.json
     │   └── audio
     │       ├── 1.wav
@@ -61,9 +61,9 @@ The `datasets` directory should look like:
  and `OTHER_DATASET/alignment.json` should look like:
 
     {
-        "./datasets/OTHER_DATASET/audio/001.wav": "My name is Taehoon Kim.",
-        "./datasets/OTHER_DATASET/audio/002.wav": "The buses aren't the problem.",
-        "./datasets/OTHER_DATASET/audio/003.wav": "They have discovered a new particle.",
+        "./datasets/OTHER_DATASET/audio/001.wav": "그래서 사람들도 날 핍이라고 불렀다.",
+        "./datasets/OTHER_DATASET/audio/002.wav": "크리스마스 덕분에 부엌에 먹을게 가득했다.",
+        "./datasets/OTHER_DATASET/audio/003.wav": "조가 자신이 그 사람이라고 나섰다.",
     }
  
  
