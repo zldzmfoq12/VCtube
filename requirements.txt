@@ -67,3 +67,4 @@ wcwidth==0.1.7
 Werkzeug==0.12.2
 unidecode==1.0.22
 inflect==0.2.5
+youtube_transcript_api
