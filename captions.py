@@ -6,9 +6,6 @@ import pandas as pd
 from functools import partial
 from youtube_transcript_api import YouTubeTranscriptApi
 
-base_dir = "your base directory path"
-channels=['your channels']
-
 def download_captions():
     for i in channels:
         video_id =[]
