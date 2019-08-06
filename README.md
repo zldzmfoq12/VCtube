@@ -1,3 +1,2 @@
-# voice-synthesizer
-Voice synthesizer for korean with crawled datasets
-==================================================
+Voice synthesizer for korean with crawled datasets using Deep-voice2
+====================================================================
