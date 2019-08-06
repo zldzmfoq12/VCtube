@@ -25,7 +25,6 @@ Follow below commands. (explain with `channel1` dataset)
 1. Download speech(or video) and text.
 
        youtube-dl --download-archive downloaded.txt --no-overwrites -ic -o "./datasets/channel1/audio/%(id)s.%(ext)s" --yes-playlist --extract-audio --audio-format wav --audio-quality 0 --socket-timeout 5 "youtube channel url"
-       
        python3 -m caption --base_dir "./datasets/" --channels=channel1,channel2,channel3
 
 2. Segment all audios on silence.
