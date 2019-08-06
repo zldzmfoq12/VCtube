@@ -36,7 +36,7 @@ def download_captions():
         dfObj.to_csv(base_dir+i+'/text/subtitle.csv', index=False, header =False)
         print(i+' channel was finished')
         
-def download_caption_batch(base_dirs, channels, **kargv):
+def download_caption_batch(base_dirs, channels):
 
     fn = partial(download_captions, **kargv)
 
