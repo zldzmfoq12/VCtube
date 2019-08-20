@@ -8,7 +8,7 @@ Voice synthesizer for korean using Deep-voice2
 - FFmpeg
 - [Tensorflow 1.8](https://www.tensorflow.org/install/, "tensorflow-gpu would be better" https://www.tensorflow.org/install/gpu)
 - youtube-dl
-- If you don't have any datasets, go to https://www.kaggle.com/zldzmfoq12/korean-voice and download datasets.
+- If you don't have any datasets, go to https://www.kaggle.com/zldzmfoq12/korean-voice, https://www.kaggle.com/bryanpark/korean-single-speaker-speech-dataset and download datasets.
 
 ## Usage
 
