@@ -64,7 +64,7 @@ tqdm==4.19.2
 traitlets==4.3.2
 urllib3==1.24.2
 wcwidth==0.1.7
-Werkzeug==0.12.2
+Werkzeug==0.15.3
 unidecode==1.0.22
 inflect==0.2.5
 youtube_transcript_api
