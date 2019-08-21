@@ -30,7 +30,7 @@ Follow below commands. (explain with `channel1` dataset)
 
 2. Segment all audios on silence.
 
-       python3 -m audio.silence --audio_pattern "./datasets/channel1/audio/*.wav"
+       python3 -m audio.split --audio_pattern "./datasets/channel1/audio/*.wav" --method=pydub
 
 3. Finally, generated numpy files which will be used in training.
 
