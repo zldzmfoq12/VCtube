@@ -11,14 +11,15 @@ from functools import partial
 
 from hparams import hparams
 from models import create_model, get_most_recent_checkpoint
-from audio import save_audio, inv_spectrogram, inv_preemphasis, \
-                  inv_spectrogram_tensorflow
-from utils import plot, PARAMS_NAME, load_json, load_hparams, \
-                  add_prefix, add_postfix, get_time, parallel_run, makedirs, str2bool
+from audio import save_audio, inv_spectrogram, inv_preemphasis, inv_spectrogram_tensorflow
+from utils import plot, PARAMS_NAME, load_json, load_hparams, add_prefix, add_postfix, get_time, parallel_run, makedirs, str2bool
 
 from text.korean import tokenize
 from text import text_to_sequence, sequence_to_text
-
+from datasets.datafeeder import _prepare_inputs
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+tf.logging.set_verbosity(tf.logging.ERROR)
 
 class Synthesizer(object):
     def close(self):
@@ -47,11 +48,8 @@ class Synthesizer(object):
         with tf.variable_scope('model') as scope:
             self.model = create_model(hparams)
 
-            self.model.initialize(
-                    inputs, input_lengths,
-                    self.num_speakers, speaker_id)
-            self.wav_output = \
-                    inv_spectrogram_tensorflow(self.model.linear_outputs)
+            self.model.initialize(inputs, input_lengths, self.num_speakers, speaker_id,rnn_decoder_test_mode=True)
+            self.wav_output = inv_spectrogram_tensorflow(self.model.linear_outputs)
 
         print('Loading checkpoint: %s' % checkpoint_path)
 
@@ -78,7 +76,7 @@ class Synthesizer(object):
             librosa_trim=False,
             attention_trim=True,
             isKorean=True):
-
+        # manual_attention_mode가 on되면, manual attention 적용하지 않음 버전과 적용한 버전해서, 2개가 만들어 진다.
         # Possible inputs:
         # 1) text=text
         # 2) text=texts
@@ -88,21 +86,22 @@ class Synthesizer(object):
             texts = [texts]
 
         if texts is not None and tokens is None:
-            sequences = [text_to_sequence(text) for text in texts]
+            sequences = np.array([text_to_sequence(text) for text in texts])
+            sequences = _prepare_inputs(sequences)
         elif tokens is not None:
             sequences = tokens
 
+        #sequences = np.pad(sequences,[(0,0),(0,5)],'constant',constant_values=(0))  # case by case ---> overfitting?
+        
         if paths is None:
             paths = [None] * len(sequences)
         if texts is None:
             texts = [None] * len(sequences)
 
         time_str = get_time()
-        def plot_and_save_parallel(
-                wavs, alignments, use_manual_attention):
+        def plot_and_save_parallel(wavs, alignments, use_manual_attention,mels):
 
-            items = list(enumerate(zip(
-                    wavs, alignments, paths, texts, sequences)))
+            items = list(enumerate(zip(wavs, alignments, paths, texts, sequences,mels)))
 
             fn = partial(
                     plot_graph_and_save_audio,
@@ -116,95 +115,82 @@ class Synthesizer(object):
                     attention_trim=attention_trim,
                     time_str=time_str,
                     isKorean=isKorean)
-            return parallel_run(fn, items,
-                    desc="plot_graph_and_save_audio", parallel=False)
+            return parallel_run(fn, items,desc="plot_graph_and_save_audio", parallel=False)
 
-        input_lengths = np.argmax(np.array(sequences) == 1, 1)
+        #input_lengths = np.argmax(np.array(sequences) == 1, 1)+1
+        input_lengths = [np.argmax(a==1)+1 for a in sequences]
 
         fetches = [
                 #self.wav_output,
                 self.model.linear_outputs,
-                self.model.alignments,
+                self.model.alignments,   #  # batch_size, text length(encoder), target length(decoder)
+                self.model.mel_outputs,
         ]
 
-        feed_dict = {
-                self.model.inputs: sequences,
-                self.model.input_lengths: input_lengths,
-        }
+        feed_dict = { self.model.inputs: sequences, self.model.input_lengths: input_lengths, }
         if base_alignment_path is None:
-            feed_dict.update({
-                    self.model.manual_alignments: np.zeros([1, 1, 1]),
-                    self.model.is_manual_attention: False,
-            })
+            feed_dict.update({self.model.manual_alignments: np.zeros([1, 1, 1]), self.model.is_manual_attention: False, })
         else:
             manual_alignments = []
-            alignment_path = os.path.join(
-                    base_alignment_path,
-                    os.path.basename(base_path))
+            #alignment_path = os.path.join(base_alignment_path,os.path.basename(base_path))
+            alignment_path = os.path.join(os.path.basename(base_path),base_alignment_path)
 
             for idx in range(len(sequences)):
-                numpy_path = "{}.{}.npy".format(alignment_path, idx)
+                numpy_path = "{}{}.npy".format(alignment_path, idx)
                 manual_alignments.append(np.load(numpy_path))
 
             alignments_T = np.transpose(manual_alignments, [0, 2, 1])
-            feed_dict.update({
-                    self.model.manual_alignments: alignments_T,
-                    self.model.is_manual_attention: True,
-            })
+            feed_dict.update({self.model.manual_alignments: alignments_T, self.model.is_manual_attention: True})
 
         if speaker_ids is not None:
             if type(speaker_ids) == dict:
                 speaker_embed_table = sess.run(
                         self.model.speaker_embed_table)
 
-                speaker_embed =  [speaker_ids[speaker_id] * \
-                        speaker_embed_table[speaker_id] for speaker_id in speaker_ids]
-                feed_dict.update({
-                        self.model.speaker_embed_table: np.tile()
-                })
+                speaker_embed =  [speaker_ids[speaker_id] * speaker_embed_table[speaker_id] for speaker_id in speaker_ids]
+                feed_dict.update({ self.model.speaker_embed_table: np.tile() })
             else:
                 feed_dict[self.model.speaker_id] = speaker_ids
 
-        wavs, alignments = \
-                self.sess.run(fetches, feed_dict=feed_dict)
-        results = plot_and_save_parallel(
-                wavs, alignments, True)
+        wavs, alignments,mels = self.sess.run(fetches, feed_dict=feed_dict)
+        results = plot_and_save_parallel(wavs, alignments, use_manual_attention = False,mels=mels)  # use_manual_attention = True/False는 출력파일명에 'manual'을 넣고 빼고 차이 뿐.
+        
+
 
         if manual_attention_mode > 0:
             # argmax one hot
             if manual_attention_mode == 1:
-                alignments_T = np.transpose(alignments, [0, 2, 1]) # [N, E, D]
-                new_alignments = np.zeros_like(alignments_T)
+                alignments_T = np.transpose(alignments, [0, 2, 1]) #   [batch_size, Encoder length, Decoder_length] ==>    [N,D,E].   (1, 50, 200) -->((1,200,50)
+                new_alignments = np.zeros_like(alignments_T)  # model에서 attention은 (N,D,E)이므로 
 
-                for idx in range(len(alignments)):
-                    argmax = alignments[idx].argmax(1)
-                    new_alignments[idx][(argmax, range(len(argmax)))] = 1
+                for idx in range(len(alignments)):  # batch에 대한 loop
+                    argmax = alignments[idx].argmax(1)   # text가 소리의 어디쯤에서 가장 영향을 많이 주었나? 즉 어디서 발음되나?
+                    new_alignments[idx][(argmax, range(len(argmax)))] = 1  # 최대값을 가지는 위치만 1로 바꾸어주는 효과. 나머지는 모두 0
             # sharpening
             elif manual_attention_mode == 2:
-                new_alignments = np.transpose(alignments, [0, 2, 1]) # [N, E, D]
+                new_alignments = np.transpose(alignments, [0, 2, 1]) # [N, E, D]  ==> [N,D,E]
 
-                for idx in range(len(alignments)):
-                    var = np.var(new_alignments[idx], 1)
+                for idx in range(len(alignments)):  # batch에 대한 loop
+                    # 분산, 평균을 계산한 후, 사용하지도 않네... 뭐야!!!
+                    var = np.var(new_alignments[idx], 1)   # variance  [N,D].  각 Decoder time별 attention variance
                     mean_var = var[:input_lengths[idx]].mean()
 
-                    new_alignments = np.pow(new_alignments[idx], 2)
+                    new_alignments[idx] = np.power(new_alignments[idx], 2)
             # prunning
             elif manual_attention_mode == 3:
                 new_alignments = np.transpose(alignments, [0, 2, 1]) # [N, E, D]
 
                 for idx in range(len(alignments)):
                     argmax = alignments[idx].argmax(1)
-                    new_alignments[idx][(argmax, range(len(argmax)))] = 1
+                    new_alignments[idx][(argmax, range(len(argmax)))] = 1  # 최대값을 가지는 위치만 1로 바꾸어주는 효과. 나머지는 모두 유지
 
             feed_dict.update({
                     self.model.manual_alignments: new_alignments,
                     self.model.is_manual_attention: True,
             })
 
-            new_wavs, new_alignments = \
-                    self.sess.run(fetches, feed_dict=feed_dict)
-            results = plot_and_save_parallel(
-                    new_wavs, new_alignments, True)
+            new_wavs, new_alignments = self.sess.run(fetches, feed_dict=feed_dict)
+            results = plot_and_save_parallel( new_wavs, new_alignments, True)
 
         return results
 
@@ -218,7 +204,7 @@ def plot_graph_and_save_audio(args,
         librosa_trim=False, attention_trim=False,
         time_str=None, isKorean=True):
 
-    idx, (wav, alignment, path, text, sequence) = args
+    idx, (wav, alignment, path, text, sequence,mel) = args
 
     if base_path:
         plot_path = "{}/{}.png".format(base_path, get_time())
@@ -262,29 +248,36 @@ def plot_graph_and_save_audio(args,
 
         spec_end_idx = hparams.reduction_factor * jdx + 3
         wav = wav[:spec_end_idx]
+        mel = mel[:spec_end_idx]
 
     audio_out = inv_spectrogram(wav.T)
 
     if librosa_trim and end_of_sentence:
-        yt, index = librosa.effects.trim(audio_out,
-                frame_length=5120, hop_length=256, top_db=50)
+        yt, index = librosa.effects.trim(audio_out, frame_length=5120, hop_length=256, top_db=50)
         audio_out = audio_out[:index[-1]]
+        mel = mel[:index[-1]//hparams.hop_size]
 
     if save_alignment:
         alignment_path = "{}/{}.npy".format(base_path, idx)
         np.save(alignment_path, alignment, allow_pickle=False)
 
+    
     if path or base_path:
         if path:
             current_path = add_postfix(path, idx)
         elif base_path:
             current_path = plot_path.replace(".png", ".wav")
 
-        save_audio(audio_out, current_path)
+        save_audio(audio_out, current_path,hparams.sample_rate)
+         
+        #hccho    
+        mel_path = current_path.replace(".wav",".npy")
+        np.save(mel_path,mel)
+               
         return True
     else:
         io_out = io.BytesIO()
-        save_audio(audio_out, io_out)
+        save_audio(audio_out, io_out,hparams.sample_rate)
         result = io_out.getvalue()
         return result
 
@@ -372,12 +365,13 @@ def short_concat(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--load_path', required=True)
-    parser.add_argument('--sample_path', default="samples")
+    parser.add_argument('--sample_path', default="logdir-tacotron/generate")
     parser.add_argument('--text', required=True)
     parser.add_argument('--num_speakers', default=1, type=int)
     parser.add_argument('--speaker_id', default=0, type=int)
     parser.add_argument('--checkpoint_step', default=None, type=int)
     parser.add_argument('--is_korean', default=True, type=str2bool)
+    parser.add_argument('--base_alignment_path', default=None)
     config = parser.parse_args()
 
     makedirs(config.sample_path)
@@ -385,9 +379,5 @@ if __name__ == "__main__":
     synthesizer = Synthesizer()
     synthesizer.load(config.load_path, config.num_speakers, config.checkpoint_step)
 
-    audio = synthesizer.synthesize(
-            texts=[config.text],
-            base_path=config.sample_path,
-            speaker_ids=[config.speaker_id],
-            attention_trim=False,
-            isKorean=config.is_korean)[0]
+    audio = synthesizer.synthesize(texts=[config.text],base_path=config.sample_path,speaker_ids=[config.speaker_id],
+                                   attention_trim=True,base_alignment_path=config.base_alignment_path,isKorean=config.is_korean)[0]
