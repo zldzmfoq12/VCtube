@@ -19,7 +19,7 @@ Voice synthesizer for korean using Deep-voice2
     
 After preparing prerequisites, install tensorflow(or tensorflow-gpu)
 
-### 2-2. Generate Korean datasets
+### 2-1. Generate Korean datasets
 
 Follow below commands. (explain with `channel1` dataset)
 
