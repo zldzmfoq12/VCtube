@@ -45,6 +45,7 @@ def download_captions(channels):
 
     print(len(text), len(start), len(duration), len(names))
     df = pd.DataFrame({"id":video_id, "text":text, "start":start, "duration":duration, "name":names})
+    makedirs(base_dir+c+'/text')
     df.to_csv(base_dir+c+'/text/subtitle.csv', encoding='utf-8')
     file_data=OrderedDict()
     for i in range(df.shape[0]):
