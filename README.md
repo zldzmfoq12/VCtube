@@ -1,20 +1,18 @@
 Audio, Caption Crawler and Processor
--------------------------------------
+=====================================
 
 
-Downloads and processes the audios and captions(subtitles) from Youtube videos for Speech AI
-=============================================================================================
+##### Downloads and processes the audios and captions(subtitles) from Youtube videos for Speech AI
+
 
 
 Requirements
-~~~~~~~~~~~~
+-------------
 
 * Currently requires python >= 3.6
 
 To Use
-~~~~~~
-
-.. code:: python
+--------
 
    from accp import ACCP
     
@@ -28,11 +26,9 @@ To Use
    
    accp.audio_split()       #split 
 
-Development
-===========
 
 Results
-~~~~~~~~~
+----------
    
    datasets
      |- playlist name
