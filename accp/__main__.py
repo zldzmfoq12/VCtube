@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*- 
 import os
 import re
 import sys
@@ -5,7 +6,6 @@ import csv
 import json
 import argparse
 import tqdm
-import numpy as np
 import youtube_dl
 import pandas as pd
 from glob import glob
