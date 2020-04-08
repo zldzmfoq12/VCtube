@@ -13,9 +13,9 @@ from pydub import AudioSegment
 from functools import partial
 from collections import OrderedDict
 from youtube_transcript_api import YouTubeTranscriptApi
-from utils import makedirs, parallel_run
+from .utils import makedirs, parallel_run
 
-class ACCP:
+class VCtube:
     def __init__(self, output_dir:str, youtube_url:str) -> None:
         self.output_dir = output_dir
         self.youtube_url = youtube_url

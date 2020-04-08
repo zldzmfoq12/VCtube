@@ -15,17 +15,18 @@ Requirements
 To Use
 --------
 
-      from accp import ACCP
+      from vctube import VCtube
 
       playlist_name=""
       playlist_url = ""
 
-      accp = ACCP(playlist_name, playlist_url)
-      accp.download_audio()    #download audio from youtube
+      vc = VCtube(playlist_name, playlist_url)
 
-      accp.download_caption()  #download captions from youtube
+      vc.download_audio()    #download audio from youtube
 
-      accp.audio_split()       #split 
+      vc.download_caption()  #download captions from youtube
+
+      vc.audio_split()       #split with caption
 
 
 Results
