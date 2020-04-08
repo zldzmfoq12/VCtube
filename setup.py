@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="audio and caption crawler", # Replace with your own username
+    name="audio, caption crawler and processor", # Replace with your own username
     version="0.0.1",
     author="Seugnhun Jeong",
     author_email="zldzmfoq12@naver.com",
-    description="A pakage for crawling audio and caption from Youtube",
+    description="A pakage for crawling and processing audio, caption from Youtube",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/zldzmfoq12/aud_crawler",
