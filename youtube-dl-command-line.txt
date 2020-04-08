@@ -1,1 +1,0 @@
-youtube-dl --download-archive downloaded.txt --no-overwrites -ic -o "D:/deepvoice/datasets/lee/audio/%(id)s.%(ext)s" --yes-playlist --extract-audio --audio-format wav --audio-quality 0 --socket-timeout 5 "youtube channel url"
