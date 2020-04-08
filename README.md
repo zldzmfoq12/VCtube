@@ -10,6 +10,7 @@ Requirements
 -------------
 
 * Currently requires python >= 3.6
+* FFmpeg
 
 To Use
 --------
