@@ -91,7 +91,7 @@ class VCtube:
         base_dir="./datasets/"+self.output_dir+'/wavs/*.wav'
         audio_paths = glob(base_dir)
         audio_paths.sort()
-        fn = partial(split_with_caption, 'wav')
+        fn = partial(split_with_caption)
         parallel_run(fn, audio_paths, desc="Split with caption", parallel=False)
 
 
