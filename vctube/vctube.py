@@ -16,9 +16,10 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from .utils import makedirs, parallel_run
 
 class VCtube:
-    def __init__(self, output_dir:str, youtube_url:str) -> None:
+    def __init__(self, output_dir:str, youtube_url:str, lang:str) -> None:
         self.output_dir = output_dir
         self.youtube_url = youtube_url
+        self.lang = lang
     
     def download_audio(self) -> None:
         base_dir="./datasets/"
@@ -49,6 +50,7 @@ class VCtube:
     def download_captions(self) -> None:
         base_dir="./datasets/"
         c = self.output_dir
+        lang = self.lang
         video_id =[]
         text = []
         start = []
@@ -60,7 +62,7 @@ class VCtube:
         for f in tqdm.tqdm(file_list_wav):
             try:
                 video = f.split(".wav")[0]
-                subtitle = YouTubeTranscriptApi.get_transcript(video, languages=['ko'])
+                subtitle = YouTubeTranscriptApi.get_transcript(video, languages=[lang])
                 for s in range(len(subtitle)-1):
                     video_id.append(video)
                     full_name = base_dir+c+'/wavs/'+video+'.'+str(s).zfill(4)+'.wav'
