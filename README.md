@@ -20,8 +20,9 @@ To Use
 
       playlist_name=""
       playlist_url = ""
+      lang = ""   #ex) ko, en, fr, de...
 
-      vc = VCtube(playlist_name, playlist_url)
+      vc = VCtube(playlist_name, playlist_url, lang)
 
       vc.download_audio()    #download audios from youtube
 
