@@ -27,7 +27,7 @@ To Use
 
       vc.download_caption()  #download captions from youtube
 
-      vc.audio_split()       #split with caption
+      vc.audio_split()       #split audio with captions
 
 
 Results
