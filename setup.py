@@ -5,7 +5,7 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setuptools.setup(
     name="vctube", # Replace with your own username
-    version="0.1.2",
+    version="0.1.3",
     author="Seugnhun Jeong",
     author_email="zldzmfoq12@naver.com",
     description="A pakage for crawling and processing audio, caption from Youtube",
