@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
 Name: vctube
-Version: 0.2
+Version: 1.1
 Summary: A pakage for crawling and processing audio, caption from Youtube
 Home-page: https://github.com/zldzmfoq12/aud_crawler
 Author: Seugnhun Jeong
 Author-email: zldzmfoq12@naver.com
 License: UNKNOWN
-Download-URL: https://github.com/zldzmfoq12/aud_crawler/archive/0.0.tar.gz
+Download-URL: https://github.com/zldzmfoq12/aud_crawler/archive/1.1.tar.gz
 Description: Audio, Caption Crawler and Processor -TTS Data Generator-
         =====================================
         
@@ -35,7 +35,7 @@ Description: Audio, Caption Crawler and Processor -TTS Data Generator-
         
               vc.download_audio()    #download audios from youtube
         
-              vc.download_caption()  #download captions from youtube
+              vc.download_captions()  #download captions from youtube
         
               vc.audio_split()       #split audio with captions
         

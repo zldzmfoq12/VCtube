@@ -72,7 +72,11 @@ class VCtube:
                     subtitle[s]['text'] = ''.join([c for c in subtitle[s]['text'] if c not in ('!', '?', ',', '.', '\n', '~', '"', "'")])
                     text.append(subtitle[s]['text'])
                     start.append(subtitle[s]['start'])
-                    duration.append(subtitle[s+1]['start'] - subtitle[s]['start'])
+                    if subtitle[s]['duration'] >= (subtitle[s+1]['start'] - subtitle[s]['start']):
+                        duration.append(subtitle[s+1]['start'] - subtitle[s]['start'])
+                    else:
+                        duration.append(subtitle[s]['duration'])
+
             except:
                 pass
 
