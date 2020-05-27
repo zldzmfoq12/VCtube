@@ -17,7 +17,8 @@ To Use
 --------
 
       pip3 install vctube
-      
+-------------------------------------
+
       from vctube import VCtube
 
       playlist_name=""
