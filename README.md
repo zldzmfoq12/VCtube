@@ -16,6 +16,8 @@ Requirements
 To Use
 --------
 
+      pip3 install vctube
+      
       from vctube import VCtube
 
       playlist_name=""
@@ -63,3 +65,6 @@ Results
         ...
     }
 
+Pypi address
+---------------
+https://pypi.org/project/vctube/
