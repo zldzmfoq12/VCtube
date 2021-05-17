@@ -5,7 +5,7 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setuptools.setup(
     name="vctube",
-    version="1.2.1",
+    version="1.3",
     author="Seugnhun Jeong",
     author_email="zldzmfoq12@naver.com",
     description="A package for crawling and processing audio, caption from Youtube",
@@ -20,5 +20,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=["pandas", "pydub", "tqdm", "youtube_dl", "youtube_transcript_api"],
-    python_requires='>=3.6',
+    python_requires='==3.6',
 )
