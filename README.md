@@ -10,7 +10,7 @@ Audio, Caption Crawler and Processor -TTS Data Generator-
 Requirements
 -------------
 
-* Currently requires python == 3.6
+* Currently requires python >= 3.6
 * FFmpeg
 * youtube_dl 
 * pydub 
