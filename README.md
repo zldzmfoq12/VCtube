@@ -4,6 +4,7 @@ Audio, Caption Crawler and Processor -TTS Data Generator-
 
 ##### Downloads and processes the audios and captions(subtitles) from Youtube videos for Speech AI
 ##### Generates audio datas from Youtube for TTS
+##### You can get more details in http://www.interspeech2020.org/index.php?m=content&c=index&a=show&catid=392&id=516
 
 
 
