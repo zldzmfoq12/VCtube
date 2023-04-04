@@ -20,7 +20,7 @@ Requirements
 To Use
 --------
 
-      pip3 install vctube
+      pip install vctube
 -------------------------------------
 
       from vctube import VCtube
