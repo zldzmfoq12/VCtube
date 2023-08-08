@@ -9,7 +9,7 @@ from glob import glob
 
 import pandas as pd
 import tqdm
-import youtube_dl
+import yt_dlp as youtube_dl
 from pydub import AudioSegment
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import NoTranscriptFound
